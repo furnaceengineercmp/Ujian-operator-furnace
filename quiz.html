@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ujian Operator Furnace</title>
+<style>
+  :root{
+    --navy:#0f2942; --navy2:#173a5e; --amber:#f5a623; --amber-dark:#d98c0f;
+    --green:#1e8e5a; --red:#d64545; --bg:#eef2f6; --card:#ffffff; --muted:#65758a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; background:linear-gradient(160deg,var(--navy) 0%, var(--navy2) 45%, #2a5580 100%);
+    font-family:'Segoe UI',Roboto,Arial,sans-serif; color:#1c2a3a; padding:24px 12px;
+  }
+  .wrap{max-width:720px; margin:0 auto;}
+  .header{text-align:center; color:#fff; margin-bottom:20px;}
+  .header h1{margin:0 0 4px; font-size:1.5rem; letter-spacing:.3px;}
+  .header p{margin:0; color:#cfe0f0; font-size:.9rem;}
+  .card{
+    background:var(--card); border-radius:14px; padding:28px 26px; box-shadow:0 12px 30px rgba(0,0,0,.25);
+  }
+  .field{margin-bottom:16px;}
+  label{display:block; font-weight:600; font-size:.85rem; margin-bottom:6px; color:var(--navy2);}
+  input[type=text], input[type=date], input[type=email], input[type=password]{
+    width:100%; padding:10px 12px; border:1.5px solid #d6dfe8; border-radius:8px; font-size:.95rem;
+    transition:border .15s;
+  }
+  input:focus{outline:none; border-color:var(--amber);}
+  .checks{
+    display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; border:1.5px solid #d6dfe8; border-radius:8px; padding:10px 12px;
+  }
+  .checks label{display:flex; align-items:center; gap:8px; font-weight:400; font-size:.9rem; margin:4px 0; color:#1c2a3a;}
+  .checks input{width:auto;}
+  .btn{
+    width:100%; padding:13px; border:none; border-radius:9px; background:var(--amber); color:#1c2a3a;
+    font-weight:700; font-size:1rem; cursor:pointer; transition:background .15s, transform .1s;
+  }
+  .btn:hover{background:var(--amber-dark);}
+  .btn:active{transform:scale(.99);}
+  .btn:disabled{background:#c7cfd8; cursor:not-allowed;}
+  .msg{font-size:.85rem; margin-top:10px; text-align:center; min-height:18px;}
+  .msg.error{color:var(--red);}
+  .msg.ok{color:var(--green);}
+  .hidden{display:none !important;}
+
+  .qcard{border:1.5px solid #e3e9ef; border-radius:10px; padding:16px 18px; margin-bottom:14px;}
+  .qnum{font-size:.78rem; font-weight:700; color:var(--amber-dark); text-transform:uppercase; letter-spacing:.4px;}
+  .qtext{font-weight:600; margin:6px 0 12px; font-size:.98rem; line-height:1.4;}
+  .opt{display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:7px; cursor:pointer; margin-bottom:4px;}
+  .opt:hover{background:#f5f8fb;}
+  .opt input{margin-top:3px;}
+  .opt span{font-size:.92rem; line-height:1.4;}
+  .progress{
+    position:sticky; top:0; background:var(--card); padding:8px 0 14px; margin-bottom:6px; z-index:5;
+    font-size:.85rem; color:var(--muted); text-align:center; border-bottom:1px solid #e3e9ef;
+  }
+
+  .score-box{text-align:center; padding:20px 0;}
+  .score-num{font-size:3.2rem; font-weight:800; color:var(--navy2); margin:8px 0 2px;}
+  .score-label{color:var(--muted); font-size:.9rem;}
+  .score-note{margin-top:16px; font-size:.95rem;}
+  .spinner{
+    width:34px; height:34px; border:4px solid #e3e9ef; border-top-color:var(--amber); border-radius:50%;
+    animation:spin .8s linear infinite; margin:20px auto;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  #quizSection, #resultSection{position:relative; overflow:hidden; user-select:none; -webkit-user-select:none;}
+  .watermark{
+    position:absolute; inset:-20% -20%; pointer-events:none; z-index:50;
+    display:flex; flex-wrap:wrap; align-content:flex-start; gap:38px 26px;
+    transform:rotate(-25deg); opacity:.07; font-size:12px; font-weight:700; color:#000;
+  }
+  .watermark span{white-space:nowrap;}
+  .leave-banner{
+    display:none; background:#fdecec; color:var(--red); border:1px solid #f3c2c2; border-radius:8px;
+    padding:8px 12px; font-size:.82rem; text-align:center; margin-bottom:12px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>Ujian Operator Furnace</h1>
+    <p>Isi biodata dan password untuk memulai ujian</p>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="card" id="loginSection">
+    <form id="loginForm">
+      <div class="field">
+        <label>Tanggal</label>
+        <input type="date" id="f_tanggal" required>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="f_email" required placeholder="nama@perusahaan.com">
+      </div>
+      <div class="field">
+        <label>Nama</label>
+        <input type="text" id="f_nama" required>
+      </div>
+      <div class="field">
+        <label>ID Karyawan</label>
+        <input type="text" id="f_id" required>
+      </div>
+      <div class="field">
+        <label>Jabatan</label>
+        <input type="text" id="f_jabatan" required>
+      </div>
+      <div class="field">
+        <label>Pernah ditempatkan di? (bisa lebih dari satu)</label>
+        <div class="checks" id="placementChecks">
+          <span style="color:var(--muted); font-size:.85rem;">Memuat opsi...</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="f_password" required>
+      </div>
+      <button type="submit" class="btn" id="loginBtn">Masuk</button>
+      <div class="msg" id="loginMsg"></div>
+    </form>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="card hidden" id="quizSection">
+    <div class="watermark" id="watermarkOverlay"></div>
+    <div class="progress" id="progressText"></div>
+    <div id="questionsContainer"></div>
+    <button class="btn" id="submitBtn">Kirim Jawaban</button>
+    <div class="msg" id="quizMsg"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="card hidden" id="resultSection">
+    <div class="score-box">
+      <div class="score-label">Skor Anda</div>
+      <div class="score-num" id="scoreNum">-</div>
+      <div class="score-note" id="scoreNote"></div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="card hidden" id="loadingSection">
+    <div class="spinner"></div>
+    <p style="text-align:center; color:var(--muted);">Menyiapkan soal...</p>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   GANTI URL DI BAWAH INI dengan URL Web App hasil deploy Apps Script.
+   Contoh: https://script.google.com/macros/s/AKfycbxxxxxxx/exec
+===================================================================== */
+const CONFIG = {
+  API_URL: 'https://script.google.com/macros/s/AKfycbymt5ugbmql8_Aw3t5AA0DUKKSfNXQtJNv3DZw8iyUD1_KvZi4SJQrfGbep6xFox3k/exec'
+};
+
+const state = {
+  sessionId: null,
+  password: null,
+  questions: [],
+  answers: {},
+  pollTimer: null,
+  nama: '',
+  idKaryawan: ''
+};
+let quizActive = false;
+
+const el = (id) => document.getElementById(id);
+
+function showOnly(id) {
+  ['loginSection','quizSection','resultSection','loadingSection'].forEach(s => {
+    el(s).classList.toggle('hidden', s !== id);
+  });
+}
+
+async function apiGet(action) {
+  const res = await fetch(`${CONFIG.API_URL}?action=${action}`);
+  return res.json();
+}
+
+async function apiPost(payload) {
+  const res = await fetch(CONFIG.API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight on Apps Script
+    body: JSON.stringify(payload)
+  });
+  return res.json();
+}
+
+// --- init: load placement options + default date ---
+(async function init() {
+  el('f_tanggal').value = new Date().toISOString().slice(0, 10);
+  try {
+    const data = await apiGet('init');
+    const box = el('placementChecks');
+    box.innerHTML = '';
+    (data.placementOptions || []).forEach((opt, i) => {
+      const label = document.createElement('label');
+      label.innerHTML = `<input type="checkbox" name="placement" value="${escapeHtml(opt)}"><span>${escapeHtml(opt)}</span>`;
+      box.appendChild(label);
+    });
+    if (!data.placementOptions || data.placementOptions.length === 0) {
+      box.innerHTML = '<span style="color:var(--muted); font-size:.85rem;">Tidak ada opsi ditemukan.</span>';
+    }
+  } catch (err) {
+    el('placementChecks').innerHTML = '<span style="color:var(--red); font-size:.85rem;">Gagal memuat opsi. Cek koneksi / URL API.</span>';
+  }
+})();
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.innerText = str;
+  return d.innerHTML;
+}
+
+// --- login submit ---
+el('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = el('loginMsg');
+  msg.textContent = '';
+  msg.className = 'msg';
+
+  const placements = Array.from(document.querySelectorAll('input[name=placement]:checked')).map(c => c.value);
+  if (placements.length === 0) {
+    msg.textContent = 'Pilih minimal satu penempatan.';
+    msg.className = 'msg error';
+    return;
+  }
+
+  const payload = {
+    action: 'login',
+    tanggal: el('f_tanggal').value,
+    email: el('f_email').value.trim(),
+    nama: el('f_nama').value.trim(),
+    idKaryawan: el('f_id').value.trim(),
+    jabatan: el('f_jabatan').value.trim(),
+    pernahDitempatkan: placements,
+    password: el('f_password').value
+  };
+
+  el('loginBtn').disabled = true;
+  showOnly('loadingSection');
+
+  try {
+    const res = await apiPost(payload);
+    if (!res.success) {
+      showOnly('loginSection');
+      msg.textContent = res.message || 'Gagal masuk.';
+      msg.className = 'msg error';
+      el('loginBtn').disabled = false;
+      return;
+    }
+    state.sessionId = res.sessionId;
+    state.password = payload.password;
+    state.questions = res.questions;
+    state.answers = {};
+    state.nama = payload.nama;
+    state.idKaryawan = payload.idKaryawan;
+    renderQuiz();
+    renderWatermark();
+    showOnly('quizSection');
+    startPasswordPolling();
+    quizActive = true;
+  } catch (err) {
+    showOnly('loginSection');
+    msg.textContent = 'Terjadi kesalahan koneksi. Coba lagi.';
+    msg.className = 'msg error';
+    el('loginBtn').disabled = false;
+  }
+});
+
+function renderQuiz() {
+  const container = el('questionsContainer');
+  container.innerHTML = '';
+  state.questions.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'qcard';
+    const optsHtml = q.options.map((opt, oi) => `
+      <label class="opt">
+        <input type="radio" name="${q.id}" value="${oi}">
+        <span>${escapeHtml(opt)}</span>
+      </label>
+    `).join('');
+    card.innerHTML = `
+      <div class="qnum">Soal ${idx + 1} dari ${state.questions.length}</div>
+      <div class="qtext">${escapeHtml(q.soal)}</div>
+      ${optsHtml}
+    `;
+    container.appendChild(card);
+  });
+  container.addEventListener('change', (e) => {
+    if (e.target.type === 'radio') {
+      state.answers[e.target.name] = Number(e.target.value);
+      updateProgress();
+    }
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(state.answers).length;
+  el('progressText').textContent = `Terjawab ${answered} dari ${state.questions.length} soal`;
+}
+
+el('submitBtn').addEventListener('click', async () => {
+  const msg = el('quizMsg');
+  msg.textContent = '';
+  msg.className = 'msg';
+
+  const unanswered = state.questions.length - Object.keys(state.answers).length;
+  if (unanswered > 0) {
+    const ok = confirm(`Masih ada ${unanswered} soal belum dijawab. Tetap kirim?`);
+    if (!ok) return;
+  }
+
+  el('submitBtn').disabled = true;
+  showOnly('loadingSection');
+
+  try {
+    const res = await apiPost({
+      action: 'submit',
+      sessionId: state.sessionId,
+      answers: state.answers
+    });
+    stopPasswordPolling();
+    quizActive = false;
+    if (!res.success) {
+      showOnly('quizSection');
+      msg.textContent = res.message || 'Gagal mengirim jawaban.';
+      msg.className = 'msg error';
+      el('submitBtn').disabled = false;
+      if (res.message && res.message.toLowerCase().includes('password')) {
+        setTimeout(resetToLogin, 1500);
+      }
+      return;
+    }
+    el('scoreNum').textContent = res.score;
+    el('scoreNote').textContent = `Anda menjawab benar ${res.correct} dari ${res.total} soal. Terima kasih telah mengikuti ujian.`;
+    showOnly('resultSection');
+  } catch (err) {
+    showOnly('quizSection');
+    msg.textContent = 'Terjadi kesalahan koneksi. Coba lagi.';
+    msg.className = 'msg error';
+    el('submitBtn').disabled = false;
+  }
+});
+
+// --- periodic password validity check while quiz is open ---
+function startPasswordPolling() {
+  stopPasswordPolling();
+  state.pollTimer = setInterval(async () => {
+    try {
+      const res = await apiPost({ action: 'checkPassword', password: state.password });
+      if (res.success && !res.valid) {
+        stopPasswordPolling();
+        alert('Password telah diubah oleh admin. Sesi Anda berakhir, silakan hubungi admin untuk password terbaru.');
+        resetToLogin();
+      }
+    } catch (err) { /* abaikan error jaringan sesaat */ }
+  }, 15000);
+}
+function stopPasswordPolling() {
+  if (state.pollTimer) clearInterval(state.pollTimer);
+  state.pollTimer = null;
+}
+function resetToLogin() {
+  quizActive = false;
+  stopPasswordPolling();
+  state.sessionId = null;
+  state.password = null;
+  state.questions = [];
+  state.answers = {};
+  el('loginForm').reset();
+  el('f_tanggal').value = new Date().toISOString().slice(0, 10);
+  el('loginBtn').disabled = false;
+  el('submitBtn').disabled = false;
+  showOnly('loginSection');
+}
+
+function renderWatermark() {
+  const box = el('watermarkOverlay');
+  const tag = `${state.nama} • ${state.idKaryawan} • ${el('f_tanggal').value || ''}`;
+  box.innerHTML = '';
+  for (let i = 0; i < 40; i++) {
+    const span = document.createElement('span');
+    span.textContent = tag;
+    box.appendChild(span);
+  }
+}
+
+// --- reset ujian jika peserta meninggalkan halaman (pindah tab / minimize / tutup) ---
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && quizActive) {
+    quizActive = false;
+    stopPasswordPolling();
+    alert('Anda meninggalkan halaman ujian. Sesi direset — silakan login ulang untuk mengerjakan dari awal.');
+    resetToLogin();
+  }
+});
+
+// tampilkan konfirmasi browser saat user mencoba menutup/refresh tab selagi ujian berlangsung
+window.addEventListener('beforeunload', (e) => {
+  if (quizActive) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+// jika browser mengembalikan halaman dari cache (tombol back), paksa reload supaya state benar-benar bersih
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) window.location.reload();
+});
+
+// deterrent dasar: cegah klik kanan, copy, dan seleksi teks selama sesi soal berlangsung
+document.addEventListener('contextmenu', (e) => { if (quizActive) e.preventDefault(); });
+document.addEventListener('copy', (e) => { if (quizActive) e.preventDefault(); });
+document.addEventListener('selectstart', (e) => { if (quizActive) e.preventDefault(); });
+</script>
+</body>
+</html>
