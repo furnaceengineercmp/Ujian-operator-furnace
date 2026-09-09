@@ -46,6 +46,7 @@
   .hidden{display:none !important;}
 
   .qcard{border:1.5px solid #e3e9ef; border-radius:10px; padding:16px 18px; margin-bottom:14px;}
+  .qimg{max-width:100%; max-height:320px; display:block; border-radius:8px; margin:8px 0 14px; border:1px solid #e3e9ef;}
   .qnum{font-size:.78rem; font-weight:700; color:var(--amber-dark); text-transform:uppercase; letter-spacing:.4px;}
   .qtext{font-weight:600; margin:6px 0 12px; font-size:.98rem; line-height:1.4;}
   .opt{display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:7px; cursor:pointer; margin-bottom:4px;}
@@ -286,9 +287,11 @@ function renderQuiz() {
         <span>${escapeHtml(opt)}</span>
       </label>
     `).join('');
+    const imgHtml = q.image ? `<img class="qimg" src="${q.image}" alt="Gambar soal">` : '';
     card.innerHTML = `
       <div class="qnum">Soal ${idx + 1} dari ${state.questions.length}</div>
       <div class="qtext">${escapeHtml(q.soal)}</div>
+      ${imgHtml}
       ${optsHtml}
     `;
     container.appendChild(card);
